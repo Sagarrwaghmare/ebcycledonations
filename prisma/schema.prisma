@@ -1,5 +1,3 @@
-// prisma/schema.prisma
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,41 +6,33 @@ datasource db {
   provider = "mysql"
 }
 
-// 1. USERS / DONORS
-model User {
-  id        Int        @id @default(autoincrement())
-  name      String
-  photoUrl  String?    // Optional: URL to image (Cloudinary/S3)
-  createdAt DateTime   @default(now())
-  updatedAt   DateTime @default(now())
-
-  
-  // A user can have multiple donations
-  donations Donation[]
+model config {
+  id          Int      @id @default(autoincrement())
+  appName     String   @default("Cycle Project")
+  isActive    Boolean  @default(true)
+  lastChecked DateTime @default(now())
 }
 
-// 2. DONATIONS (The Cycles)
-model Donation {
+model donation {
   id          Int      @id @default(autoincrement())
-  studentName String   // Name of student receiving cycle
-  standard    String   // Class/Standard
+  studentName String
+  standard    String
   schoolName  String
-  location    String   // Google Map Link or City Name
-  photoUrl    String?  // Optional: Photo of the specific cycle/student
+  location    String
+  photoUrl    String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now())
-
-  // Foreign Key linking to User
   userId      Int
-  user        User     @relation(fields: [userId], references: [id])
+  user        user     @relation(fields: [userId], references: [id], map: "Donation_userId_fkey")
+
+  @@index([userId], map: "Donation_userId_fkey")
 }
 
-// 3. CONFIG (The Kill Switch & Settings)
-model Config {
-  id            Int      @id @default(autoincrement())
-  appName       String   @default("Cycle Project") // Just for reference
-  
-  // Your logic requirements:
-  isActive      Boolean  @default(true) // First option: true/false
-  lastChecked   DateTime @default(now()) // Second option: datetime stamp
+model user {
+  id        Int        @id @default(autoincrement())
+  name      String
+  photoUrl  String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @default(now())
+  donation  donation[]
 }
